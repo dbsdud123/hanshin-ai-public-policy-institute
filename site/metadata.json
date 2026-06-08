@@ -1,0 +1,6 @@
+{
+  "name": "한신대학교 AI 공공정책연구소",
+  "description": "한신대학교 AI 공공정책연구소 공식 웹사이트. 연구소 소개, 비전, 연구진, 연구성과, 공지사항 및 문의 제공.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
