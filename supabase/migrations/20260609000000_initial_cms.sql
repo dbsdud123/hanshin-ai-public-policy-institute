@@ -78,4 +78,3 @@ using (public.is_hs_aipp_admin());
 
 create index if not exists inquiries_created_at_idx on public.inquiries (created_at desc);
 create index if not exists inquiries_status_idx on public.inquiries (status);
-

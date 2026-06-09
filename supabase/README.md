@@ -19,6 +19,7 @@ Supabase 데이터베이스 스키마와 migration 파일을 관리하는 폴더
 - `lps.official.231128@gmail.com`
 - `lubjugi3@hs.ac.kr`
 - `newmind68@hs.ac.kr`
+- `nsc0203@hs.ac.kr`
 
 ## 적용 파일
 

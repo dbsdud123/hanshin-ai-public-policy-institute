@@ -35,7 +35,7 @@ npm run build
 
 Supabase 환경변수가 설정되면 Supabase Auth와 데이터베이스를 사용합니다. 환경변수가 없으면 localStorage 기반 시연 모드로 동작합니다.
 
-- 관리자 이메일: `lps.official.231128@gmail.com`, `lubjugi3@hs.ac.kr`, `newmind68@hs.ac.kr`
+- 관리자 이메일: `lps.official.231128@gmail.com`, `lubjugi3@hs.ac.kr`, `newmind68@hs.ac.kr`, `nsc0203@hs.ac.kr`
 - 로컬 임시 비밀번호: `admin1234`
 
 ## Supabase 환경변수

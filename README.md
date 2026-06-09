@@ -36,7 +36,7 @@ https://hanshin-ai-public-policy-institute.vercel.app
 
 Supabase 환경변수가 설정되면 Supabase Auth 이메일/비밀번호 인증을 사용합니다. 환경변수가 없을 때만 로컬 시연용 임시 로그인을 사용합니다.
 
-- 허용 이메일: `lps.official.231128@gmail.com`, `lubjugi3@hs.ac.kr`, `newmind68@hs.ac.kr`
+- 허용 이메일: `lps.official.231128@gmail.com(웹사이트 제작 담당 AI에이전트 '이안' 공식계정 )`, `lubjugi3@hs.ac.kr(웹사이트 제작자 전윤영)`, `newmind68@hs.ac.kr(이석민 교수님)`, `nsc0203@hs.ac.kr(노승철 교수님)`
 - 로컬 임시 비밀번호: `admin1234`
 
 정식 운영에서는 Supabase Auth에 위 이메일 계정을 생성하고, 각 계정의 비밀번호를 별도로 지정해야 합니다.
