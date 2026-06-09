@@ -8,7 +8,7 @@ import { Mail, Phone, MapPin, Landmark, MessageSquare, Send, CheckCircle2, Clock
 import { Inquiry } from '../types';
 
 interface ContactViewProps {
-  onAddInquiry: (inquiry: Omit<Inquiry, 'id' | 'date' | 'status'>) => void;
+  onAddInquiry: (inquiry: Omit<Inquiry, 'id' | 'date' | 'status'>) => void | Promise<void>;
 }
 
 export default function ContactView({ onAddInquiry }: ContactViewProps) {
@@ -23,11 +23,11 @@ export default function ContactView({ onAddInquiry }: ContactViewProps) {
   // Form Submission Success Feedback inside modal/banner
   const [submittedTicket, setSubmittedTicket] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Invoke parent action
-    onAddInquiry({
+    await onAddInquiry({
       name,
       email,
       phone,

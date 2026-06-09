@@ -25,6 +25,7 @@ interface AdminViewProps {
   inquiries: Inquiry[];
   setInquiries: React.Dispatch<React.SetStateAction<Inquiry[]>>;
   setActiveTab: (tab: string) => void;
+  syncStatus?: string;
 }
 
 type AdminSubTab = 'intro' | 'members' | 'research' | 'notices' | 'inquiries';
@@ -41,6 +42,7 @@ export default function AdminView({
   inquiries,
   setInquiries,
   setActiveTab,
+  syncStatus,
 }: AdminViewProps) {
   const [subTab, setSubTab] = useState<AdminSubTab>('intro');
 
@@ -282,6 +284,11 @@ export default function AdminView({
           <p className="text-slate-500 text-sm mt-1">
             코딩을 몰라도 소개글, 연구진 명단, 연구보고서, 학술게시판, 접수된 문의 내역까지 원클릭으로 수정 관리할 수 있습니다.
           </p>
+          {syncStatus && (
+            <p className="text-[11px] text-slate-400 mt-2 font-bold">
+              저장 상태: {syncStatus}
+            </p>
+          )}
         </div>
         <button
           onClick={() => setActiveTab('home')}
@@ -363,7 +370,7 @@ export default function AdminView({
 
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 text-xs text-slate-500">
             <p className="font-extrabold text-slate-700">💡 관리자 모드 안내</p>
-            <p className="leading-relaxed">관리자 대시보드 내의 변경사항은 로컬 스토리지에 안정 보존되어 즉시 실제 홈페이지 화면에 동기 적용됩니다.</p>
+            <p className="leading-relaxed">관리자 대시보드 내 변경사항은 Supabase 연결 시 서버 DB에 저장되고, 미연결 시 로컬 시안 데이터로 보존됩니다.</p>
           </div>
         </div>
 

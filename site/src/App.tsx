@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomeView from './components/HomeView';
@@ -30,6 +30,17 @@ import {
   Inquiry 
 } from './types';
 import { ADMIN_EMAILS, TEMP_ADMIN_PASSWORD } from './config';
+import {
+  canUseSupabase,
+  createInquiry,
+  getCurrentAdminEmail,
+  loadAdminInquiries,
+  loadPublicContent,
+  replaceInquiries,
+  saveContent,
+  signInAdminWithPassword,
+  signOutAdmin,
+} from './lib/contentStore';
 import { Lock, X, KeyRound, ShieldAlert } from 'lucide-react';
 
 export default function App() {
@@ -88,6 +99,12 @@ export default function App() {
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => 
     getStoredData<Inquiry[]>('inquiries', initialInquiries)
   );
+  const [syncStatus, setSyncStatus] = useState<string>(() =>
+    canUseSupabase() ? 'Supabase 연결 확인 중' : '로컬 시안 모드'
+  );
+  const [isHydrated, setIsHydrated] = useState(false);
+  const saveTimers = useRef<Record<string, number>>({});
+  const hasLoadedAdminInquiries = useRef(false);
 
   // External selection triggers (e.g. tracking click from Home -> Research / Board detail)
   const [selectedResearchId, setSelectedResearchId] = useState<string | null>(null);
@@ -104,6 +121,49 @@ export default function App() {
   const [loginEmail, setLoginEmail] = useState<string>('');
   const [loginPassword, setLoginPassword] = useState<string>('');
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateFromSupabase() {
+      if (!canUseSupabase()) {
+        setIsHydrated(true);
+        return;
+      }
+
+      try {
+        const [serverContent, adminEmailFromSession] = await Promise.all([
+          loadPublicContent(),
+          getCurrentAdminEmail(),
+        ]);
+
+        if (cancelled) return;
+
+        if (serverContent.intro) setIntro(serverContent.intro);
+        if (serverContent.members) setMembers(serverContent.members);
+        if (serverContent.research) setResearch(serverContent.research);
+        if (serverContent.notices) setNotices(serverContent.notices);
+
+        if (adminEmailFromSession) {
+          setIsAdmin(true);
+          setAdminEmail(adminEmailFromSession);
+        }
+
+        setSyncStatus('Supabase 서버 데이터 동기화 완료');
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Supabase 연결 실패: 기본 데이터로 표시 중');
+      } finally {
+        if (!cancelled) setIsHydrated(true);
+      }
+    }
+
+    hydrateFromSupabase();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Synchronization Side Effects: Save changed state back to localStorage
   useEffect(() => {
@@ -134,14 +194,85 @@ export default function App() {
     setStoredData('adminEmail', adminEmail);
   }, [adminEmail]);
 
+  const scheduleServerSave = <T,>(key: string, saver: () => Promise<T>) => {
+    if (!canUseSupabase() || !isHydrated || !isAdmin) return;
+    window.clearTimeout(saveTimers.current[key]);
+    saveTimers.current[key] = window.setTimeout(async () => {
+      try {
+        setSyncStatus('Supabase 저장 중');
+        await saver();
+        setSyncStatus('Supabase 저장 완료');
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Supabase 저장 실패: 관리자 인증 또는 DB 정책 확인 필요');
+      }
+    }, 650);
+  };
+
+  useEffect(() => {
+    scheduleServerSave('intro', () => saveContent('intro', intro));
+  }, [intro, isAdmin, isHydrated]);
+
+  useEffect(() => {
+    scheduleServerSave('members', () => saveContent('members', members));
+  }, [members, isAdmin, isHydrated]);
+
+  useEffect(() => {
+    scheduleServerSave('research', () => saveContent('research', research));
+  }, [research, isAdmin, isHydrated]);
+
+  useEffect(() => {
+    scheduleServerSave('notices', () => saveContent('notices', notices));
+  }, [notices, isAdmin, isHydrated]);
+
+  useEffect(() => {
+    if (!isAdmin || !canUseSupabase() || hasLoadedAdminInquiries.current) return;
+    hasLoadedAdminInquiries.current = true;
+
+    loadAdminInquiries()
+      .then((serverInquiries) => {
+        if (serverInquiries.length > 0) {
+          setInquiries(serverInquiries);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        setSyncStatus('문의 목록 동기화 실패: 관리자 인증 또는 DB 정책 확인 필요');
+      });
+  }, [isAdmin]);
+
+  useEffect(() => {
+    scheduleServerSave('inquiries', () => replaceInquiries(inquiries));
+  }, [inquiries, isAdmin, isHydrated]);
+
   // Administration Actions
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const normalizedEmail = loginEmail.trim().toLowerCase();
 
     if (!ADMIN_EMAILS.includes(normalizedEmail)) {
       setLoginError('등록된 관리자 이메일이 아닙니다. 관리자 후보 이메일을 다시 확인해주십시오.');
       return;
+    }
+
+    if (canUseSupabase()) {
+      try {
+        const signedEmail = await signInAdminWithPassword(normalizedEmail, loginPassword);
+        setIsAdmin(true);
+        setAdminEmail(signedEmail);
+        setOpenLoginModal(false);
+        setLoginEmail('');
+        setLoginPassword('');
+        setLoginError(null);
+        setSyncStatus('Supabase 관리자 인증 완료');
+        setActiveTab('admin');
+        return;
+      } catch (error) {
+        setLoginError(
+          `Supabase 관리자 인증에 실패했습니다. ${(error as Error).message || '계정과 비밀번호를 확인해주십시오.'}`
+        );
+        return;
+      }
     }
 
     if (loginPassword === TEMP_ADMIN_PASSWORD) {
@@ -158,17 +289,30 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('관리자 모드를 해제하고 세션을 로그아웃 하시겠습니까?')) {
+      await signOutAdmin();
       setIsAdmin(false);
       setAdminEmail('');
+      hasLoadedAdminInquiries.current = false;
       if (activeTab === 'admin') {
         setActiveTab('home');
       }
     }
   };
 
-  const handleAddInquiry = (newInq: Omit<Inquiry, 'id' | 'date' | 'status'>) => {
+  const handleAddInquiry = async (newInq: Omit<Inquiry, 'id' | 'date' | 'status'>) => {
+    try {
+      if (canUseSupabase()) {
+        const fresh = await createInquiry(newInq);
+        setInquiries((prev) => [fresh, ...prev]);
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      setSyncStatus('문의 서버 접수 실패: 로컬에 임시 저장됨');
+    }
+
     const fresh: Inquiry = {
       ...newInq,
       id: 'HSX-' + Math.floor(100000 + Math.random() * 900000),
@@ -233,6 +377,7 @@ export default function App() {
               inquiries={inquiries}
               setInquiries={setInquiries}
               setActiveTab={setActiveTab}
+              syncStatus={syncStatus}
             />
           );
         } else {
@@ -373,7 +518,9 @@ export default function App() {
               <div className="flex items-center gap-1.5 p-3 rounded-md bg-slate-50 border border-slate-200 text-[10px] text-slate-400 leading-normal pl-2.5">
                 <ShieldAlert className="w-4 h-4 shrink-0 text-slate-400" />
                 <span>
-                  1차 시안용 임시 로그인입니다. 테스트 비밀번호는 <b className="font-mono text-slate-700">{TEMP_ADMIN_PASSWORD}</b> 이며, 정식 운영 전 Supabase 인증으로 교체합니다.
+                  {canUseSupabase()
+                    ? 'Supabase Auth에 등록된 관리자 이메일과 비밀번호로 로그인합니다.'
+                    : <>1차 시안용 임시 로그인입니다. 테스트 비밀번호는 <b className="font-mono text-slate-700">{TEMP_ADMIN_PASSWORD}</b> 이며, Supabase 환경변수 연결 후 정식 인증으로 전환됩니다.</>}
                 </span>
               </div>
             </form>

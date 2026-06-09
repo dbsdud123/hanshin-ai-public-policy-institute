@@ -21,7 +21,7 @@ interface HomeViewProps {
   setSelectedResearchId?: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedNoticeId?: React.Dispatch<React.SetStateAction<string | null>>;
   lang: 'ko' | 'en';
-  onAddInquiry?: (inq: Omit<Inquiry, 'id' | 'date' | 'status'>) => void;
+  onAddInquiry?: (inq: Omit<Inquiry, 'id' | 'date' | 'status'>) => void | Promise<void>;
 }
 
 export default function HomeView({
@@ -202,12 +202,12 @@ export default function HomeView({
   }, []);
 
   // Form submission handler
-  const handleInquirySubmit = (e: React.FormEvent) => {
+  const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName || !formEmail || !formContent) return;
 
     if (onAddInquiry) {
-      onAddInquiry({
+      await onAddInquiry({
         name: formName,
         email: formEmail,
         phone: formPhone,

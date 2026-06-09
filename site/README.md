@@ -21,15 +21,26 @@ npm run build
 ## 주요 구조
 
 - `src/data.ts`: 사이트에 들어가는 소개, 연구진, 연구성과, 공지사항 기본 데이터
-- `src/config.ts`: 제작자 정보, 관리자 허용 이메일, 임시 비밀번호
+- `src/config.ts`: 제작자 정보, 관리자 허용 이메일, 로컬 임시 비밀번호
+- `src/lib/supabase.ts`: Supabase 클라이언트 설정
+- `src/lib/contentStore.ts`: Supabase CMS 저장/조회 로직
 - `src/components/`: 화면별 React 컴포넌트
 
 ## 관리자
 
-현재 관리자 기능은 1차 시연용입니다. localStorage에 저장되며, 정식 운영 전에는 Supabase Auth와 데이터베이스로 교체해야 합니다.
+Supabase 환경변수가 설정되면 Supabase Auth와 데이터베이스를 사용합니다. 환경변수가 없으면 localStorage 기반 시연 모드로 동작합니다.
 
 - 관리자 이메일: `lps.official.231128@gmail.com`, `lubjugi3@hs.ac.kr`, `newmind68@hs.ac.kr`
-- 임시 비밀번호: `admin1234`
+- 로컬 임시 비밀번호: `admin1234`
+
+## Supabase 환경변수
+
+```bash
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+```
+
+Vercel 배포 시에도 동일한 환경변수를 등록해야 합니다.
 
 ## 원본 AI Studio 앱
 
