@@ -6,6 +6,9 @@
 
 - 원본 GitHub: https://github.com/LeeSeogMin/AI_center.git
 - 현재 공개 배포 주소: https://ai-policy-institute.vercel.app/
+- 새 GitHub 저장소: https://github.com/dbsdud123/hanshin-ai-public-policy-institute
+- 새 1차 배포 주소: https://hanshin-ai-public-policy-institute.vercel.app
+- Supabase 프로젝트: `hanshin-ai-public-policy` (`svjbxfetepsoeudxgnoj`)
 - 아이클라우드 원본 위치: `/Users/dbsdud03/Library/Mobile Documents/com~apple~CloudDocs/LPS/LPS_사업부/사업3과                 (대행사업)/한신대학교_연구소_웹사이트제작/AI_center-master`
 
 ## 목표
@@ -24,6 +27,10 @@ npm run dev
 ```
 
 브라우저에서 `http://localhost:3000/`을 열면 현재 1차 구현 사이트를 볼 수 있습니다.
+
+## 공개 배포 주소
+
+https://hanshin-ai-public-policy-institute.vercel.app
 
 ## 관리자 로그인
 

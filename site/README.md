@@ -11,6 +11,11 @@ npm run dev
 
 기본 주소는 `http://localhost:3000/`입니다.
 
+## 배포
+
+- Production: https://hanshin-ai-public-policy-institute.vercel.app
+- GitHub: https://github.com/dbsdud123/hanshin-ai-public-policy-institute
+
 ## 검증
 
 ```bash

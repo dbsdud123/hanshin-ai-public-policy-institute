@@ -4,6 +4,10 @@ Supabase 데이터베이스 스키마와 migration 파일을 관리하는 폴더
 
 ## 1차 CMS 구조
 
+- 프로젝트명: `hanshin-ai-public-policy`
+- Project ref: `svjbxfetepsoeudxgnoj`
+- 리전: `ap-northeast-2`
+
 - `site_content`: 연구소 소개, 연구진, 연구성과, 공지사항을 JSON으로 저장합니다.
 - `inquiries`: 방문자 문의를 저장합니다.
 - 공개 방문자는 `site_content.public_read = true`인 콘텐츠만 읽을 수 있습니다.
